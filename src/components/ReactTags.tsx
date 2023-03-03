@@ -42,6 +42,7 @@ const DefaultClassNames: ClassNames = {
 const DefaultDelimiterKeys = [KeyNames.Enter]
 
 type ReactTagsProps = {
+  allowDuplicates?: boolean
   allowBackspace?: boolean
   allowNew?: boolean
   allowResize?: boolean
@@ -83,6 +84,7 @@ function ReactTags(
     allowBackspace = true,
     allowNew = false,
     allowResize = true,
+    allowDuplicates = false,
     ariaAddedText = 'Added tag %value%',
     ariaDescribedBy,
     ariaErrorMessage,
@@ -125,6 +127,7 @@ function ReactTags(
 
   const managerRef = useManager({
     allowNew,
+    allowDuplicates,
     closeOnSelect,
     newOptionText,
     noOptionsText,
@@ -167,7 +170,7 @@ function ReactTags(
     >
       <Root onBlur={onBlur} onFocus={onFocus}>
         <Label render={renderLabel}>{labelText}</Label>
-        <TagList label={tagListLabelText}>
+        <TagList label={tagListLabelText} allowDuplicates={allowDuplicates}>
           {managerRef.current.state.selected.map((tag, index) => (
             <Tag key={tagToKey(tag)} index={index} render={renderTag} title={deleteButtonText} />
           ))}

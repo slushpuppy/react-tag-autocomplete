@@ -37,6 +37,7 @@ export type ManagerFlags = {
 }
 
 export type ManagerProps = {
+  allowDuplicates: boolean
   allowNew: boolean
   closeOnSelect: boolean
   newOptionText: string
@@ -73,6 +74,7 @@ export function useManager({
   startWithFirstOption,
   suggestions,
   suggestionsTransform,
+  allowDuplicates,
 }: ManagerProps): React.MutableRefObject<UseManagerState> {
   const ref = useRef<UseManagerState>()
 
@@ -148,15 +150,25 @@ export function useManager({
       }
     },
     selectTag(tag?: Tag) {
+      const allowDuplicateCheck = allowDuplicates && !allowNew
+      const isOptionSelect = !tag
+
       tag ??= findSelectedOption(state)
 
       if (tag) {
         const tagIndex = findTagIndex(tag, state.selected)
 
-        if (tagIndex > -1) {
+        if (tagIndex > -1 && !isOptionSelect && allowDuplicateCheck) {
           onDelete(tagIndex)
         } else {
-          onAdd(tag)
+          if (allowDuplicateCheck) {
+            const tagClone = { ...tag }
+            //unique uuidv4 - tag sorting
+            tagClone.value = `${1e7}-${1e3}-${4e3}-${8e3}-${1e11}`.replace(/[018]/g, (c: any) =>
+              (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16)
+            )
+            onAdd(tagClone)
+          } else onAdd(tag)
         }
 
         if (closeOnSelect) {
